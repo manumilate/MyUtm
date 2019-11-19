@@ -1,0 +1,2933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-----MAP--->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet-src.js"></script>
+	<script src="https://unpkg.com/esri-leaflet"></script>
+	<link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder/dist/esri-leaflet-geocoder.css">
+	<script src="https://unpkg.com/esri-leaflet-geocoder"></script>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+
+	<script src="https://kit.fontawesome.com/ca8e9033cf.js" crossorigin="anonymous"></script>
+	<!-------CSS---->
+	<link rel="stylesheet" href="css/style.css">
+	<!-----jquery---->
+	<link rel="stylesheet" href="jquery/jquery.mobile-1.4.5.min.css">
+	<script src="jquery/jquery.min.js"></script>
+	<script src="jquery/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type="text/javascript" src="timetable.js"></script>
+	<script type="text/javascript" src="result.js"></script>
+	<script type="text/javascript" src="postgraduate.js"></script>
+	<script type="text/javascript" src="news.js"></script>
+	
+
+<script type="text/javascript">
+				function contactUs(){
+					var sub = document.getElementById('subject').value;
+					var ema = document.getElementById('email').value;
+					var mess = document.getElementById('message').value;
+					
+					//alert(sub);
+
+					var url = "http://localhost:8080/mobproject/php/contact.php";
+
+					$.post(url, {subject: sub, email: ema, message: mess}).done(function(data){
+						alert(data);
+					});
+				}
+	</script>
+
+
+</head>
+
+<body>
+
+<script>
+              navigator.geolocation.getCurrentPosition(userLocated, locationError);
+			//define function userLocated
+			function userLocated(position) 
+			{
+			  var latitude = position.coords.latitude;
+			  var longitude = position.coords.longitude;
+
+			  //set the view of the map to null specific location
+			  var mymap = L.map('mapid').setView([0, 0], 2);
+			  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+				maxZoom: 19,
+				attribution: 'Map data &copy;<a href="https://www.openstreetmap.org/">OpenStreetMap</a>contributors,<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+				id: 'mapbox.streets',
+				accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+			  }).addTo(mymap);
+			  
+			  		mymap.setView([-20.1771, 57.4673], 17);
+					var marker2 = L.marker([-20.1771, 57.4673]).addTo(mymap);
+					marker2.bindPopup("UTM is here").closePopup();
+					
+								
+					var circle = L.circle([-20.1771,57.4673 ], {
+							color: 'red',
+							fillColor: '#f03',
+							fillOpacity: 0.5,
+							radius: 100
+						}).addTo(mymap);
+						circle.bindPopup("Earthquakes zone");
+			  
+			  //refresh the map to the null specific location view
+			  L.easyButton('fa-refresh', function() 
+				{
+					mymap.setView([-20.1771, 57.4673], 17);
+				}).addTo(mymap);
+			  
+			  //click to show the marker with your current location
+			  L.easyButton('fa-home', function() 
+				{
+					mymap.setView([latitude, longitude], 15);
+					var marker = L.marker([latitude, longitude]).addTo(mymap);
+					marker.bindPopup("Your Location").closePopup();
+				}).addTo(mymap);
+
+			  
+			  //search bar to search specific location on the map
+			  var searchControl = L.esri.Geocoding.geosearch().addTo(mymap);
+			  var results = new L.LayerGroup().addTo(mymap);
+			  searchControl.on('results', function(data) 
+				{
+					results.clearLayers();
+					for (var i = data.results.length - 1; i >= 0; i--) 
+					{
+						results.addLayer(L.marker(data.results[i].latlng));
+					}
+				});
+
+			  var geocodeService = L.esri.Geocoding.geocodeService();
+			  mymap.on('click', function(e) 
+				{
+					geocodeService.reverse().latlng(e.latlng).run(function(error, result)
+					{
+						if (error) 
+						{
+							return;
+						}
+						var popLocation = e.latlng;
+						var popup = L.popup()
+						.setLatLng(popLocation)
+						.setContent(result.address.Match_addr)
+						.openOn(mymap);
+					});
+				});
+			}
+			
+			
+			//error code
+			function locationError(error) 
+			{
+				switch (error.code) 
+				{
+					case error.PERMISSION_DENIED:
+					alert("Permission Denied- " + error.message);
+					break;
+					case error.POSITION_UNAVAILABLE:
+					alert("Position Not Available- " + error.message);
+					break;
+					case error.TIMEOUT:
+					alert("Request Time out- " + error.message);
+					break;
+				}
+			}
+
+
+	</script>
+	<!-----homepage----->
+
+	<div data-role="page" id="homepage">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+		<h1 class="center">Welcome to University Technology of Mauritius</h1>
+			<h3>The University of Technology, Mauritius, as at 2010, and now in its tenth year of operation, is poised for a phase of significant expansion in line with the provisions of its Act and the national agenda of increasing access to tertiary education, capacity building in the context of the ongoing economic reforms, promotion of knowledge, research and innovation, as propounded by the Ministry of Tertiary Education, Science, Research and Technology. The University of Technology, Mauritius has the determination to become one of the leading tertiary education institutions of the region. UTM is a member of the Association of Commonwealth Universities. The forthcoming construction of the new campus at Cote DOr will enable the UTM to increase its number of students, the number of programmes offered and provide better facilities.</h3>
+
+
+		                <div id="home" class="slides">
+                            <img src="image/home.jpg" alt="home" />
+
+                       </div>
+		   <h2>Get Started With Us</h2>
+			 <ul data-role="listview" data-inset="true">
+				<li class="start"><a href="#schoolpage">
+						<img src="image/undergraduate.jpg">
+						<h2>Different School proposed</h2>
+						<p>Find more information about the Schools offered by our University.</p>
+					</a>
+				</li>
+				<li class="start"><a href="#event">
+						<img src="image/postgraduate.jpg">
+						<h2>UTM Event</h2>
+						<p>Find more information about the Event in our University</p>
+					</a>
+				</li>
+				<li class="start"><a href="#fees">
+						<img src="image/fees.jpg">
+						<h2>Fees</h2>
+						<p>Find more information about the fees payable per semester</p>
+					</a>
+				</li>
+				<li class="start"><a href="#locationpage">
+						<img src="image/location.jpg">
+						<h2>Location</h2>
+						<p>For more information where UTM is located</p>
+					</a>
+				</li>
+				
+			</ul>
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		
+			</div>
+			
+			
+				<!-----student corner----->
+
+	<div data-role="page" id="studentcorner">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<h1 id="h1">Student Corner</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+						<h1 class="center">Welcome student of UTM University Technology Mauritius</h1>
+			<h3>The present day skills mismatch in the labour market and the issue of graduate unemployment
+brings additional concern as regards the employability of future graduates in Mauritius. The
+University of Technology, Mauritius decided to ponder on how to address such skill gaps
+emphasized the need to go beyond academic content and expose students more to the world of
+practice</h3>
+
+		                <div id="home" class="slides">
+                            <img src="image/university.jpg" alt="home" />
+
+                       </div>
+		   <h2>Get Started With Us</h2>
+			 <ul data-role="listview" data-inset="true">
+				<li class="start"><a href="#semtime">
+						<img src="image/school.jpg">
+						<h2>Semester Timetable</h2>
+						<p>Find more information about the Semeters timetable of our University.</p>
+					</a>
+				</li>
+				<li class="start"><a href="#examtime">
+						<img src="image/timetable.jpg">
+						<h2>Exam Timetable</h2>
+						<p>Find more information about the Exam timetable schedule</p>
+					</a>
+				</li>
+				<li class="start"><a href="#sunder">
+						<img src="image/undergraduate.jpg">
+						<h2>Undergraduate programmes</h2>
+						<p>Find more information about the undergraduate program we propose about our university</p>
+				</a>
+				</li>
+				<li class="start"><a href="#spost">
+						<img src="image/postgraduate.jpg">
+						<h2>Postgraduate programmess</h2>
+						<p>Find more information about the postgraduate program we propose about our university</p>
+					</a>
+				</li>
+				<li class="start"><a href="#sresult">
+						<img src="image/result.jpg">
+						<h2>Result</h2>
+						<p>Take a look at the result</p>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		</div>
+		
+		
+						<!-----semtime corner----->
+
+	<div data-role="page" id="semtime">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+			
+                <h1>Student Semester Timetable</h1>
+				<h4>Notice to Students</h4>
+				<ul>
+				<li>Please filter your respective cohort</li>
+				<li>Kindly note that the allocation of rooms outside UTM, i.e; BPML, La Tour Koenig, Pte aux Sables</li>
+				<li>To continuously check for update Time table before attending lectures.</li>
+				</ul>
+				  
+				<ul data-role="listview" data-inset="true">
+					<li class="start"><a id="site" href="#">
+						<img src="image/school.jpg">
+						<h2>School of Innovative Technologies and Engineering (SITE)</h2>
+						<p id="parasite"></p></a>
+					</li>
+					<li class="start"><a href="#" id="sbmf">
+						<img src="image/result.jpg">
+						<h2>School of Business, Management and Finance (SBMF)</h2>
+						<p id="parasbmf"></p></a>
+					</li>
+					<li class="start"><a href="#" id="ssdt">
+						<img src="image/timetable.jpg">
+						<h2>School of Sustainable Development and Tourism (SSDT)</h2>
+						<p id="parassdt"></p></a>
+					</li>
+					<li class="start"><a href="#" id="shs">
+						<img src="image/calendar.jpg">
+						<h2>School of Health Sciences (SHS)</h2>
+						<h3>Anna Medical College</h3>
+						<p id="parashs"></p></a>
+					</li>
+				</ul>
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		</div>
+		
+		<!----CONTACTUS----->
+<div data-role="page"  id="stucontact">
+<div id="header" data-role="header">
+<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+<div class="logo"></div>
+<h1 id="h1">University Technology of Mauritius</h1>
+<h1 id="h1">About Us</h1>
+<a href="#login" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+</div>
+
+<div data-role="navbar">
+<ul>
+	<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+	<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+	<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+	  <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+		<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+</ul>
+
+</div>
+<div data-role="main" class="ui-content">
+<h1 class="center">Contact Us</h1>
+<form method="POST">
+              <p id="returnmessage"></p>
+<label for="subject">Subject :</label>
+<input type="text" id="subject" name="subject" placeholder="Subject">
+<label for="email">Email :</label>
+<input type="email" id="email" name="email" placeholder="Email">
+<label for="message">Message :</label>
+<textarea id="message" name="message" placeholder="Message" ></textarea>
+
+<input type="submit" value="Submit" onclick="contactUs()"/>
+</form>
+
+
+
+
+
+
+
+</div>
+<div data-role="footer" data-theme="b">
+<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+</div>
+</div>
+		
+		
+		<!-----examtime corner----->
+
+	<div data-role="page" id="examtime">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+			
+<h1>Student Exam Timetable</h1>
+
+				<ul data-role="listview" data-inset="true">
+					<li class="start"><a id="esite" href="#">
+						<img src="image/undergraduate.jpg">
+						<h2>School of Innovative Technologies and Engineering (SITE)</h2>
+						<p id="paraesite"></p></a>
+					</li>
+					<li class="start"><a href="#" id="esbmf">
+						<img src="image/postgraduate.jpg">
+						<h2>School of Business, Management and Finance (SBMF)</h2>
+						<p id="paraesbmf"></p></a>
+					</li>
+					<li class="start"><a href="#" id="essdt">
+						<img src="image/timetable.jpg">
+						<h2>School of Sustainable Development and Tourism (SSDT)</h2>
+						<p id="paraessdt"></p></a>
+					</li>
+					<li class="start"><a href="#" id="eshs">
+						<img src="image/result.jpg">
+						<h2>School of Health Sciences (SHS)</h2>
+						<h3>Anna Medical College</h3>
+						<p id="paraeshs"></p></a>
+					</li>
+				</ul>
+
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		</div>
+
+		<!-----sunder corner----->
+
+	<div data-role="page" id="sunder">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+			
+
+
+                          <h1>Undergraduate Programmes</h1>		
+	<h2>School of Innovative Technologies and Engineering (SITE)</h2>
+	
+<table  data-filter="true"  input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="undersite">
+  </tbody>
+</table>
+
+	<h2>School of Business, Management and Finance (SBMF)</h2>
+	
+<table   id="table" data-filter="true" data-mode="reflow"  input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="undersbmf">
+  </tbody>
+</table>
+
+	<h2>School of Sustainable Development and Tourism (SSDT)</h2>
+	
+<table  data-filter="true"  data-mode="reflow" input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="underssdt">
+  </tbody>
+</table>
+
+	<h2>School of Health Sciences (SHS)</h2>
+	
+<table  data-filter="true"  data-mode="reflow" input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="undershs">
+  </tbody>
+</table>
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		</div>
+		
+				<!-----spost corner----->
+
+	<div data-role="page" id="spost">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+			
+
+
+                          <h1>Undergraduate Programmes</h1>		
+	<h2>School of Innovative Technologies and Engineering (SITE)</h2>
+	
+<table  data-filter="true"  input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="postsite">
+  </tbody>
+</table>
+
+	<h2>School of Business, Management and Finance (SBMF)</h2>
+	
+<table   id="table" data-filter="true" data-mode="reflow"  input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="postsbmf">
+  </tbody>
+</table>
+
+	<h2>School of Sustainable Development and Tourism (SSDT)</h2>
+	
+<table  data-filter="true"  data-mode="reflow" input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="postssdt">
+  </tbody>
+</table>
+
+	<h2>School of Health Sciences (SHS)</h2>
+	
+<table  data-filter="true"  data-mode="reflow" input="#filterTable-input" class="ui-responsive">
+   <thead>
+     <tr>
+       <th data-priority="1">Name</th>
+       <th data-priority="persist">Description</th>
+       <th data-priority="2">Mode</th>
+       <th data-priority="4">Duration</th>
+    </tr>
+  </thead>
+  <tbody id="postshs">
+  </tbody>
+</table>
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		</div>
+			
+				<!-----sresult corner----->
+
+	<div data-role="page" id="sresult">
+
+		<div id="header" data-role="header">
+			<a href="#login" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+
+			<div class="logo"></div>
+			<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+
+		</div>
+
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="b">
+			
+
+ <h1>Student Result</h1>
+
+				<ul data-role="listview" data-inset="true">
+					<li class="start"><a id="rsite" href="#">
+						<img src="image/undergraduate.jpg">
+						<h2>School of Innovative Technologies and Engineering (SITE)</h2>
+						<p id="prsite"></p></a>
+					</li>
+					<li class="start"><a href="#" id="rsbmf">
+						<img src="image/postgraduate.jpg">
+						<h2>School of Business, Management and Finance (SBMF)</h2>
+						<p id="prsbmf"></p></a>
+					</li>
+					<li class="start"><a href="#" id="rssdt">
+						<img src="image/timetable.jpg">
+						<h2>School of Sustainable Development and Tourism (SSDT)</h2>
+						<p id="prssdt"></p></a>
+					</li>
+					<li class="start"><a href="#" id="rshs">
+						<img src="image/school.jpg">
+						<h2>School of Health Sciences (SHS)</h2>
+						<h3>Anna Medical College</h3>
+						<p id="prshs"></p></a>
+					</li>
+				</ul>
+		</div>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+		
+		</div>
+			
+
+
+
+
+
+
+
+	<!-----schoolpage----->
+	<div data-role="page" id="schoolpage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SCHOOL</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" class="ui-btn-active ui-state-persist" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+		<h2>In University Technology of Mauritius(UTM) we have different school so that you can found yourself at our university</h2>
+			<h3>The list is given to you below:</h3>
+			<ul data-role="listview" data-inset="true">
+				<li><a href="#sbmfpage" data-transition="flip">
+						<img class="school" src="image/school.jpg">
+						<h2>SBMF</h2>
+						<h4>School of Business, Management and Finance</h4>
+						<p>The School of Business, Management and Finance (SBMF) offers a range of comprehensive academic programmes at undergraduate...</p>
+					</a>
+				</li>
+				<li><a href="#sitepage" data-transition="flip">
+						<img class="school" src="image/school.jpg">
+						<h2>SITE</h2>
+						<h4>School of Innovative Technologies and Engineering (SITE)</h4>
+						<p>The School of Innovative Technologies and Engineering (SITE) aims at helping the country create the necessary IT professionals to work...</p>
+					</a>
+				</li>
+				<li><a href="#ssdtpage" data-transition="flip">
+						<img class="school" src="image/school.jpg">
+						<h2>SSDT</h2>
+						<h4>School of Sustainable Development and Tourism (SSDT)</h4>
+						<p>The School of Sustainable Development and Tourism (SSDT) caters for very specific areas of the Mauritian economy such as Tourism...</p>
+					</a>
+				</li>
+				<li><a href="#shspage" data-transition="flip">
+						<img class="school" src="image/school.jpg">
+						<h2>SHS</h2>
+						<h4>School of Health Sciences (SHS)</h4>
+						<p>The School was set up in October 2015 with the recruitment of a Head of School followed, in 2016, by the recruitment of six Academic...</p>
+					</a>
+				</li>
+			</ul>
+
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+	<!-----schoolpage----->
+
+		<!-----sitepage----->
+		<div data-role="page"  id="sitepage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SITE</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+			<div data-role="main" class="ui-content">
+
+			<h1>Introduction to School of Innovative Technologies and Engineering (SITE)</h1>
+			<p>The School of Innovative Technologies and Engineering (SITE) aims at helping the country create the necessary IT professionals to work in our Cyber Island and the region.The programmes are updated regularly so as to reflect latest technological trends.</p>
+       <table data-role="table" id="tblsite"  class="ui-body-d ui-shadow table-stripe ui-responsive" >
+         <thead>
+           <tr class="ui-bar-d">
+             <th>Information</th>
+             <th>Click check button to view</th>
+
+           </tr>
+         </thead>
+         <tbody>
+           <tr>
+             <td><p>Postgraduate Programmes offered by SITE</p></td>
+             <td><a href="#postsite" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Undergraduate Programmes offered by SITE.</p></td>
+             <td><a href="#undersite" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Staff List of SITE</p></td>
+             <td><a href="#staffsite" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr> 
+         </tbody>
+       </table>
+			</div>
+			<div data-role="footer">
+				<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+			</div>
+		</div>
+	<!----postsite---->
+		<div data-role="page" id="postsite">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SITE</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1 class="center">Postgraduate Programmes - School of Innovative Technologies and Engineering (SITE)</h1>
+
+			<table data-role="table" id="tblpostsbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Name</th>
+						             <th>Mode</th>
+						             <th>Duration</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td>
+									<a href="downloads/postsite/msc1.pdf" data-theme="b" target="_blank"><p>MSc Applied Statistics with Operational Research</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>1 yr/1½ yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/postsite/msc2.pdf" data-theme="b" target="_blank"><p>MSc Financial Engineering</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>1 yr/1½ yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/postsite/msc3.pdf" data-theme="b" target="_blank"><p>MSc Biometry</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>1 yr/1½ yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/postsite/msc4.pdf" data-theme="b" target="_blank"><p>MSc Software Engineering</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>1 yr/1½ yrs</p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+	<!----staff staffsite---->
+	<div data-role="page" id="staffsite">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SITE</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1 class="center">SCHOOL OF INNOVATIVE TECHNOLOGIES AND ENGINEERING (SITE)</h1>
+			<h2>You will found below all staff name title and their email if you want to contact them</h2>
+			<h2>Head of School</h2>
+			<table data-role="table"  data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Head of SITE</h3></strong></a></td>
+						        <td><p>Mr. J. Narsoo</p></td>
+						        <td><p><a href="mailto:	jnarsoo@umail.utm.ac.mu" target="_blank">	jnarsoo@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					           <tr>
+						         <td><strong><h3>Confidential Secretary</h3></strong></a></td>
+						        <td><p>Miss Vidya CHOYTOO-BALKEE</p></td>
+						        <td><p><a href="mailto:site@umail.utm.ac.mu" target="_blank">site@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+
+			<h2>Administration</h2>
+			<table data-role="table"  data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Ag. Administrative Officer</h3></strong></a></td>
+						        <td><p>Mrs  Rishma LALLBAHADOOR</p></td>
+						        <td><p><a href="mailto:rlallbahadoor@umail.utm.ac.mu" target="_blank">rlallbahadoor@umail.utm.ac.mu</a></p></td>
+						       </tr>
+
+					         </tbody>
+			</table>
+
+			<h2>Examination Unit</h2>
+			<table data-role="table"  data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Administrative Officer</h3></strong></a></td>
+						        <td><p>Ms Pratima GAJADUR</p></td>
+						        <td><p><a href="mailto:rlallbahadoor@umail.utm.ac.mu" target="_blank">pgajadur@umail.utm.ac.mu</a></p></td>
+						       </tr>
+
+					         </tbody>
+			</table>
+
+		<h2>Technical Department</h2>
+			<table data-role="table"  data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Ag. Systems Engineer</h3></strong></a></td>
+						        <td><p>Mr Ashvin CHUKUN</p></td>
+						        <td><p><a href="mailto:	achukun@umail.utm.ac.mu" target="_blank">achukun@umail.utm.ac.mu</a></p></td>
+						       </tr>
+
+					         </tbody>
+			</table>
+
+		<h2>Department of Business Informatics and Software Engineering</h2>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Head of Department</h3></strong></a></td>
+						        <td><p>Mr Ravi FOOGOOA</p></td>
+						        <td><p><a href="mailto:kpadachi@umail.utm.ac.mu" target="_blank">	rfoogooa@umail.utm.ac.mu</a></p></td>
+						       </tr>
+								<tr>
+						         <td><strong><h3>Senior Lecturer</h3></strong></a></td>
+						        <td><p>Dr Shireen PANCHOO</p></td>
+						        <td><p><a href="mailto:s.panchoo@umail.utm.ac.mu" target="_blank">s.panchoo@umail.utm.ac.mu</a></p>
+								</td>
+						       </tr>
+								<tr>
+						         <td><strong><h3>Lecturer</h3></strong></a></td>
+						        <td><p>Mr Pillay KANAKSABEE</p><br><p>Mr Hansraj SEEGOBIN</p><br><p>Dr Geerish SUDDUL</p></td>
+						        <td><p><a href="mailto:pkanaksabee@umail.utm.ac.mu" target="_blank">pkanaksabee@umail.utm.ac.mu</a></p><br>
+								<a href="mailto:hanseegobin@utm.intnet.mu" target="_blank">hanseegobin@utm.intnet.mu</a></p><br>
+								<a href="mailto:g.suddul@umail.utm.ac.mu" target="_blank">g.suddul@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					      </tbody>
+			</table>
+
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+	<!------undersite---->
+	<div data-role="page" id="undersite">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SITE</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1>Undergraduate Programmes - School of Innovative Technologies and Engineering (SITE)</h1>
+			<table data-role="table" id="tblundersbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Name</th>
+						             <th>Mode</th>
+						             <th>Duration</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td>
+									<a href="downloads/undersite/bsc6.pdf" data-theme="b" target="_blank"><p>BEng (Hons) Civil Engineering (Top Up) (run by JSSATE, Mauritius)</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/undersite/bsc7.pdf" data-theme="b" target="_blank"><p>BEng (Hons) Electrical Engineering (Top Up) (run by JSSATE, Mauritius)</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersite/bsc8.pdf" data-theme="b" target="_blank"><p>BEng (Hons) Electronic Engineering</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersite/bsc9.pdf" data-theme="b" target="_blank"><p>BEng (Hons) Telecommunication Engineering</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersite/bsc10.pdf" data-theme="b" target="_blank"><p>BEng (Hons) Electronic Engineering (Top Up)</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersite/bsc5.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Software Engineering</p></a>
+								</td>
+						        <td><p>FT</p></td>
+						        <td><p>3yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersite/bsc4.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Web Technologies</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+					           <tr>
+						         <td>
+									<a href="downloads/undersite/bsc3.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Computer Aided Design</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/undersite/bsc2.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Computer Science with Network Security<p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersite/bsc1.pdf" data-theme="b" target="_blank"><p>BA (Hons) Graphics Design</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+
+					         </tbody>
+				       </table>
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+		<!-----ssdtpage----->
+		<div data-role="page"  id="ssdtpage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SSDT</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+			<div data-role="main" class="ui-content">
+
+			<h1>Introduction to School of Sustainable Development and Tourism (SSDT)</h1>
+			<p>The School of Sustainable Development and Tourism (SSDT) caters for very specific areas of the Mauritian economy such as Tourism, Sustainable Development and Environmental Sciences.</p>
+            <p>An MOU has also been signed with the Hotel School of Mauritius for UTM students to benefit from their facilities for practical sessions. In-company training, especially in hotels is also part of the curriculum. The School aims at producing graduates to work in the sustainable economic, social and environmental sectors of Mauritius.</p>
+	   <table data-role="table" id="tblsbmf"  class="ui-body-d ui-shadow table-stripe ui-responsive" >
+         <thead>
+           <tr class="ui-bar-d">
+             <th>Information</th>
+             <th>Click check button to view</th>
+
+           </tr>
+         </thead>
+         <tbody>
+           <tr>
+             <td><p>Postgraduate Programmes offered by SSDT</p></td>
+             <td><a href="#" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Undergraduate Programmes offered by SSDT.</p></td>
+             <td><a href="#" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Staff List of SSDT</p></td>
+             <td><a href="#" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+         </tbody>
+       </table>
+			</div>
+			<div data-role="footer">
+				<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+			</div>
+		</div>
+
+		<!-----shspage----->
+		<div data-role="page"  id="shspage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SHS</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+			<div data-role="main" class="ui-content">
+
+			<h1>School of Health Sciences (SHS)</h1>
+			<p>The School was set up in October 2015 with the recruitment of a Head of School followed, in 2016, by the recruitment of six Academic staff.  The University of Technology, Mauritius became recognized as a Medical Institution by the Medical Council of Mauritius in December 2016.  Currently, the Anna Medical College is affiliated with the University of Technology, Mauritius, with the latter as the awarding body for the MBBS programme which was revised in 2017 from a 4.5 year to a 5 year programme.  The entry requirements for the MBBS programme are in line with those prescribed by the Medical Council of Mauritius for an MBBS programme to be a recognized medical qualification for registration as medical practitioner.  A first batch of UTM awardees who completed postgraduate medical studies under the ex Padmashree Dr D. Y. Patil Medical College and UTM have successfully registered with the Medical Council of Mauritius as Medical Specialists.  UTM MBBS Graduates who completed their studies under Anna Medical College have also undertaken pre-registration examinations prescribed by the Medical Council of Mauritius qualifying them for internship. The School offers a range of other programmes in the field of Health Sciences.</p>
+
+	   <table data-role="table" id="tblsbmf"  class="ui-body-d ui-shadow table-stripe ui-responsive" >
+         <thead>
+           <tr class="ui-bar-d">
+             <th>Information</th>
+             <th>Click check button to view</th>
+
+           </tr>
+         </thead>
+         <tbody>
+           <tr>
+             <td><p>Postgraduate Programmes offered by SHS</p></td>
+             <td><a href="#" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Undergraduate Programmes offered by SHS.</p></td>
+             <td><a href="#" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Staff List of SHS</p></td>
+             <td><a href="#" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Revised MBBS programmes</p></td>
+             <td><a href="http://www.utm.ac.mu/files/sthug/programmes/shs/UG/MBBS_PROGRAMME.doc" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+           <tr>
+             <td><p>Detailed MBBS Regulations</p></td>
+             <td><a href="http://www.utm.ac.mu/files/sthug/programmes/shs/UG/REGULATIONS_MBBS_PROGRAMMES-_25_09_2017.pdf" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+           </tr>
+         </tbody>
+       </table>
+			</div>
+			<div data-role="footer">
+				<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+			</div>
+		</div>
+
+	<!-----sbmfpage----->
+	<div data-role="page" id="sbmfpage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SBMF</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1>Introduction to School of Business, Management and Finance (SBMF)</h1>
+			<p>The School of Business, Management and Finance (SBMF) offers a range of comprehensive academic programmes at undergraduate and postgraduate levels. Programmes are designed, and put-on offer to local and foreign students, increasingly from
+				Africa, in specialized area of Management, Marketing, Law, Accounting, Banking, Finance, Economics, Procurement, Logistics and Transport.</p>
+			<table data-role="table" id="tblsbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Information</th>
+						             <th>Click check button to view</th>
+
+						         </tr>
+					         </thead>
+				         <tbody>
+					       <tr>
+						       <td><p>Postgraduate Programmes offered by SBMF</p></td>
+						       <td><a href="#postsbmf" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+						   </tr>
+					       <tr>
+						        <td><p>Undergraduate Programmes offered by SBMF.</p></td>
+						         <td><a href="#undersbmf" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+						    </tr>
+					        <tr>
+						         <td><p>Staff List of SBMF</p></td>
+						         <td><a href="#staffsbmf" class="ui-btn  ui-corner-all ui-icon-check ui-btn-icon-notext ui-btn-b ui-btn-inline">Check</a></td>
+						    </tr>
+					        
+					         </tbody>
+				       </table>
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+	<!----postgraduate sbmfpage---->
+	<div data-role="page" id="postsbmf">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SBMF</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b" class="ui-btn-active ui-state-persist">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1>School of Business, Management and Finance (SBMF)</h1>
+			<h4>The School of Business, Management and Finance (SBMF) consists of the Department of Accounting, Finance and Economics (DAFE) and the Department of Business Management and Law (DBML)</h4>
+			<h2>1) Department of Accounting, Finance and Economics</h2>
+
+			<table data-role="table" id="tblpostsbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Name</th>
+						             <th>Mode</th>
+						             <th>Duration</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td>
+									<a href="downloads/postsbmf/MBA1.pdf" data-theme="b" target="_blank"><p>MBA-Financial Risk Management</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/postsbmf/MBA2.pdf" data-theme="b" target="_blank"><p>MBA-Finance and Investment</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/postsbmf/MSC1.pdf" data-theme="b" target="_blank"><p>MSC-International Business and Economics</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/postsbmf/MSC2.pdf" data-theme="b" target="_blank"><p>MSC-Banking and Finance</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+
+							<h2>2)Department of Business, Management and Law</h2>
+
+			<table data-role="table" id="tblpostsbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Name</th>
+						             <th>Mode</th>
+						             <th>Duration</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td>
+									<a href="downloads/postsbmf/MBA3.pdf" data-theme="b" target="_blank"><p>MBA - General</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/postsbmf/MBA4.pdf" data-theme="b" target="_blank"><p>MBA - Business Intelligence</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/postsbmf/MSC3.pdf" data-theme="b" target="_blank"><p>MSc Managerial Psychology</p></a>
+								</td>
+						        <td><p>PT</p></td>
+						        <td><p>2yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/postsbmf/MSC4.pdf" data-theme="b" target="_blank"><p>MSc Human Resource Management</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>1½yrs/2yrs</p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+	<!----staff sbmfpage---->
+	<div data-role="page" id="staffsbmf">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SBMF</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1 class="center">School of Business, Management and Finance (SBMF)</h1>
+			<h2>You will found below all staff name title and their email if you want to contact them</h2>
+			<h2>Head of School</h2>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Associate Prof</h3></strong></a></td>
+						        <td><p>(Dr) Hemant Birandranath CHITTOO</p></td>
+						        <td><p><a href="mailto:hchittoo@umail.utm.ac.mu" target="_blank">hchittoo@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					           <tr>
+						         <td><strong><h3>Confidential Secretary</h3></strong></a></td>
+						        <td><p>	Mrs Treena NEEROHOO</p></td>
+						        <td><p><a href="mailto:	sbmf@umail.utm.ac.mu" target="_blank">	sbmf@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+
+				<h2>Administration</h2>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Ag. Administrative Officer</h3></strong></a></td>
+						        <td><p>Mrs Sharda JATOOA</p></td>
+						        <td><p><a href="mailto:sjatooa@umail.utm.ac.mu" target="_blank">sjatooa@umail.utm.ac.mu</a></p></td>
+						       </tr>
+
+					         </tbody>
+			</table>
+
+		<h2>Department of Accounting, Finance and Economics</h2>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Head of Department</h3></strong></a></td>
+						        <td><p>Associate Prof. (Dr.) Kesseven PADACHI</p></td>
+						        <td><p><a href="mailto:kpadachi@umail.utm.ac.mu" target="_blank">kpadachi@umail.utm.ac.mu</a></p></td>
+						       </tr>
+								<tr>
+						         <td><strong><h3>Senior Lecturer</h3></strong></a></td>
+						        <td><p>Dr. Mohun Prasadsing ODIT</p><br><p>Dr. Bhisum NOWBUTSING</p></td>
+						        <td><p><a href="mailto:aodit@umail.utm.ac.mu" target="_blank">aodit@umail.utm.ac.mu</a></p><br>
+								<p><a href="mailto:	k.nowbutsing@umail.utm.ac.mu" target="_blank">	k.nowbutsing@umail.utm.ac.mu</a></p></td>
+						       </tr>
+								<tr>
+						         <td><strong><h3>Lecturer</h3></strong></a></td>
+						        <td><p>Mrs Aleesha BOOLAKY</p><br><p>Mrs Kiran ODIT-DOOKHAN</p><br><p>Dr. Yuvraj SUNECHER</p></td>
+						        <td><p><a href="mailto:aboolaky@umail.utm.ac.mu" target="_blank">aboolaky@umail.utm.ac.mu</a></p><br>
+								<a href="mailto:koditdookhan@umail.utm.ac.mu" target="_blank">koditdookhan@umail.utm.ac.mu</a></p><br>
+								<a href="mailto:ysunecher@umail.utm.ac.mu" target="_blank">ysunecher@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					      </tbody>
+			</table>
+		<h2>Department of Business, Management and Law</h2>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Title</th>
+						             <th>Name</th>
+						             <th>Email</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td><strong><h3>Head of Department</h3></strong></a></td>
+						        <td><p>Mrs Deepika FAUGOO</p></td>
+						        <td><p><a href="mailto:dfaugoo@umail.utm.ac.mu" target="_blank">dfaugoo@umail.utm.ac.mu</a></p></td>
+						       </tr>
+								<tr>
+						         <td><strong><h3>Senior Lecturer</h3></strong></a></td>
+						        <td><p>Dr. Needesh RAMPHUL</p></td>
+						        <td><p><a href="mailto:needesh.r@umail.utm.ac.mu" target="_blank">needesh.r@umail.utm.ac.mu</a></p>
+								</td>
+						       </tr>
+								<tr>
+						         <td><strong><h3>Lecturer</h3></strong></a></td>
+						        <td><p>Dr. Diroubinee MAUREE-NARRAINEN</p><br><p>Dr.  Nirmala LOUNG-POORUNDER</p><br><p>Ms Havisha VAGHJEE</p></td>
+						        <td><p><a href="mailto:aboolaky@umail.utm.ac.mu" target="_blank">d.mnarrainen@umail.utm.ac.mu</a></p><br>
+								<a href="mailto:koditdookhan@umail.utm.ac.mu" target="_blank">n.l.poorunder@umail.utm.ac.mu</a></p><br>
+								<a href="mailto:ysunecher@umail.utm.ac.mu" target="_blank">hvaghjee@umail.utm.ac.mu</a></p></td>
+						       </tr>
+					      </tbody>
+			</table>
+
+
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+	<!--undersbmf-->
+
+	<div data-role="page" id="undersbmf">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">SBMF</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>S
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+
+			<h1>Postgraduate Programmes - School of Business, Management and Finance (SBMF)</h1>
+			<h4>The School of Business, Management and Finance (SBMF) consists of the Department of Accounting, Finance and Economics (DAFE) and the Department of Business Management and Law (DBML)</h4>
+			<h2>1) Department of Accounting, Finance and Economics</h2>
+
+			<table data-role="table" id="tblundersbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Name</th>
+						             <th>Mode</th>
+						             <th>Duration</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc1.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Accounting with Finance (Accredited by ACCA)</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc2.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Banking and International Finance</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc3.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Financial Services with Law</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc4.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Financial Services with Law</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc5.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Accounting with Finance (Accredited by ACCA)</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc6.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Banking and International Finance</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+
+							<h2>2)Department of Business, Management and Law</h2>
+
+			<table data-role="table" id="tblpostsbmf" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				         <thead>
+					           <tr class="ui-bar-d">
+						             <th>Name</th>
+						             <th>Mode</th>
+						             <th>Duration</th>
+						           </tr>
+					         </thead>
+				         <tbody>
+					           <tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc7.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Management</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+			                   <tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc8.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Management with Marketing<p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc9.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Management with Law</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+								<tr>
+						         <td>
+									<a href="downloads/undersbmf/bsc10.pdf" data-theme="b" target="_blank"><p>BSc (Hons) Management with Finance</p></a>
+								</td>
+						        <td><p>FT/PT</p></td>
+						        <td><p>3yrs/4yrs</p></td>
+						       </tr>
+					         </tbody>
+				       </table>
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+
+
+	<!-----prospectivestudent----->
+	<div data-role="page"  id="pspage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">Prospective Student</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+                <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+		 <ul data-role="listview" data-inset="true">
+				<li class="start"><a href="#undergraduate">
+						<img src="image/undergraduate.jpg">
+						<h2>Undergraduate</h2>
+						<p>Find more information about the Schools offered by our University.</p>
+					</a>
+				</li>
+				<li class="start"><a href="#postgraduate">
+						<img src="image/postgraduate.jpg">
+						<h2>Postgraduate</h2>
+						<p>Find more information about the Event in our University</p>
+					</a>
+				</li>
+				<li class="start"><a href="#awardcourse">
+						<img src="image/award.jpg">
+						<h2>Award course</h2>
+						<p>Find more information about the Event in our University</p>
+					</a>
+				</li>
+				<li class="start"><a href="#fees">
+						<img src="image/fees.jpg">
+						<h2>Fees</h2>
+						<p>Find more information about the fees payable per semester</p>
+					</a>
+				</li>
+				<li class="start"><a href="#internationalstudent">
+						<img src="image/globe.png">
+						<h2>International Student</h2>
+						<p>For more information on internation students</p>
+					</a>
+				<li class="start"><a href="#regulation">
+						<img src="image/regulation.png">
+						<h2>Regulation</h2>
+						<p>For more information regulations of utm</p>
+					</a>
+				</li>
+				</li>
+			</ul>
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+
+	<!-----aboutpage----->
+	<div data-role="page"  id="aboutpage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">About Us</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b" >Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b" class="ui-btn-active ui-state-persist">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+		<ul data-role="listview" data-inset="true">
+				<li><a href="#about" data-transition="flip">
+						<img class="school" src="image/about.png">
+						<h2>ABOUT UTM</h2>
+						<h4>Learn about our Mission, Vision, Aim</h4>
+						<p> The University of Technology, Mauritius (UTM) was created in year 2000 by Act of Parliament as the Government implemented its plan to have a second University...</p>
+					</a>
+				</li>
+				<li><a href="downloads/utmact.pdf" target="_blank">
+						<img class="school" src="image/act.jpg">
+						<h2>UTM ACT</h2>
+						<h4>Learn about the UTM ACT</h4>
+					<p>To establish a University of Technology, Mauritiusand to provide for matters connected therewith</p>
+					</a>
+				</li>
+				<li><a href="#locationpage" data-transition="flip">
+						<img class="school" src="image/location.png">
+						<h2>Location</h2>
+						<h4>For more information where UTM is located</h4>
+						<p>Click to see the exact location of University technology Of Mauritius on a Map</p>
+					</a>
+				</li>
+				<li><a href="#stucontact" data-transition="flip">
+						<img class="school" src="image/location.png">
+						<h2>Contact us</h2>
+						
+					</a>
+				</li>
+				
+
+			</ul>
+
+		</div>
+		<div data-role="footer">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+	<!-----locationpage----->
+
+	<div data-role="page" id="locationpage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">UTM Location</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" class="ui-btn-active ui-state-persist" data-icon="arrow-r" data-theme="b">About</a></li>
+                <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+
+		<div data-role="main" class="ui-content" data-theme="c">
+			<h1>Location of University Technology of Mauritius</h1>
+			<p>La Tour Koenig, Pointe-aux-Sables, Republic of Mauritius</p>
+			<div id="mapid" style="height: 80vh;"></div>
+
+		</div>
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+		<!-----about----->
+	<div data-role="page"  id="about">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">About Us</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b" class="ui-btn-active ui-state-persist">About</a></li>
+	            <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+			<h1 class="center">About the UTM(University Of Technology Mauritius)</h1>
+			<p> The University of Technology, Mauritius (UTM) was created in year 2000 by Act of Parliament as the Government implemented its plan to have a second University which would focus towards development of oriented sectors in particular. Two state institutions namely the Mauritius Institute of Public Administration and Management (MIPAM) and the State Information Training Centre (SITRAC Ltd) were merged to form the University of Technology, Mauritius. This historic step in the field of higher education was prompted mainly by the need to cater more vigorously for the increasing demand for ICT and Management professionals in a country which is seriously committed to accelerate, by all means, the realization of its ambition to become a major service provider in the field of Information Technology, Management and Finance, Sustainable Development and allied areas. The University started operation by the end of year 2000. The Board of Governors (B.O.G), was in place and in year 2001, created its senior management personnel.</P>
+		    <p>The UTM has embarked on a strategy of expansion to minimise, as far as possible, the consequence of its infrastructural and financial constraints to meet the growing challenges of the tertiary education sector. Efforts in that direction have been multi fold through:</p>
+			<ol>
+			<li>Increase of programmes</li>
+            <li>Diversification of fields of study which is linked with the creation of new Schools</li>
+            <li>Several Memoranda of Understanding with different institutions viz.:</li>
+			</ol>
+			 <div class="ui-grid-a ui-responsive">
+				<div class="ui-bar ui-block-a">
+					<ul>
+					<li>DYP Worldwide Ltd</li>
+					<li>Ceridian Mauritius Ltd</li>
+					<li>Mauritius College of the Air</li>
+					<li>Mauritius Institute of Education</li>
+					<li>Fashion and Design Institute</li>
+					<li> University of Malaysia-Perlis</li>
+					<li>Constance Hospitality Training Centre</li>
+					<li> Universite de Limoges (In process)</li>
+					</ul>
+				</div>
+				</div>
+		</div>
+
+				<h3 class="center">VISION</h3>
+				<p>To become a University of national, regional and international renown, providing multi-level quality tertiary education and training including continuing professional education geared towards sustained capacity building for increasingly technology-driven and enterprise-based developments.</p>
+				<h3 class="center">MISSION</h3>
+				<p>To offer a range of University programmes and activities in full-time, part-time and mixed modes to meet the changing needs of Mauritius and develop a regional and international dimension to its activities.  UTM will aim for excellence along traditional as well as beyond traditional approaches to teaching, training, research and consultancy.</p>
+				<h3 class="center">AIM</h3>
+				<p>To provide access to a wide range of students for the acquisition of knowledge and skills with which they can make future professional contributions in various key sectors of the socio-economic and technological advancement of Mauritius and aspire to become dynamic players in regional and international activities.</p>
+
+
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+			<!-----FEES----->
+	<div data-role="page"  id="fees">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">About Us</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+                <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+			<h1 class="center">The fees payable for each Academin Year are as follows</h1>
+			<h3>INTERNATIONAL STUDENTS:</h3>
+
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				<thead>
+					<tr class="ui-bar-d">
+						<th>Details</th>
+						<th>Price</th>
+
+					</tr>
+				</thead>
+				 <tbody>
+					<tr>
+						<td><strong><h3>Application Fees</h3></strong></a></td>
+						<td><p> Rs1,000</p></td>
+					</tr>
+				    <tr>
+						<td><strong><h3>Administrative Fees</h3></strong></a></td>
+						<td><p> Rs3,500(Non-refundable)</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>Student Union Fees</h3></strong></a></td>
+						<td><p>Rs200</p></td>
+					</tr>
+					<tr>
+						<td><strong><h3>Tuition Fees</h3></strong></a></td>
+						<td><p></p></td>
+				    </tr>
+
+				 </tbody>
+			</table>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				<thead>
+					<tr class="ui-bar-d">
+						<th>Programmes</th>
+						<th>Duration</th>
+						<th>Tuition Fees including examination fees(Per Semester)</th>
+
+					</tr>
+				</thead>
+				 <tbody>
+					<tr>
+						<td><strong><h3>Certificate</h3></strong></a></td>
+						<td><p>FT</p></td>
+						<td><p>Rs22,300</p></td>
+					</tr>
+				    <tr>
+						<td><strong><h3>Diploma</h3></strong></a></td>
+						<td><p>FT</p><br><p>PT</p></td>
+						<td><p>Rs22,300</p><br><p>Rs15,700</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>Under Graduate</h3></strong></a></td>
+						<td><p>FT</p><br><p>PT</p></td>
+						<td><p>Rs22,300</p><br><p>Rs15,700</p></td>
+					</tr>
+					<tr>
+						<td><strong><h3>Post Graduate</h3></strong></a></td>
+						<td><p>FT</p><br><p>PT</p></td>
+						<td><p>Rs24,800</p><br><p>Rs18,200</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>MBA</h3></strong></a></td>
+						<td><p>PT</p></td>
+						<td><p>Rs 35,000/semester</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>MPhil/PhD Degrees</h3></strong></a></td>
+						<td></td>
+						<td><p>	Rs75,000/- per year</p></td>
+				    </tr>
+
+				 </tbody>
+			</table>
+			<h3>INTERNATIONAL STUDENTS:</h3>
+
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				<thead>
+					<tr class="ui-bar-d">
+						<th>Details</th>
+						<th>Price</th>
+
+					</tr>
+				</thead>
+				 <tbody>
+					<tr>
+						<td><strong><h3>Application Fees</h3></strong></a></td>
+						<td><p>US$50 Payable on Submission of Application</p></td>
+					</tr>
+				    <tr>
+						<td><strong><h3>Administrative Fees</h3></strong></a></td>
+						<td><p>US$200 Payable on Registration Day(Non-refundable)</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>Student Union Fees</h3></strong></a></td>
+						<td><p>US$ 10/- (Non-refundable)</p></td>
+					</tr>
+					<tr>
+						<td><strong><h3>Tuition Fees</h3></strong></a></td>
+						<td><p></p></td>
+				    </tr>
+
+				 </tbody>
+			</table>
+			<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+				<thead>
+					<tr class="ui-bar-d">
+						<th>Programmes</th>
+						<th>Duration</th>
+						<th>Tuition Fees including examination fees(Per Semester)</th>
+
+					</tr>
+				</thead>
+				 <tbody>
+					<tr>
+						<td><strong><h3>Certificate</h3></strong></a></td>
+						<td><p>FT</p></td>
+						<td><p>US$ 1,430/</p></td>
+					</tr>
+				    <tr>
+						<td><strong><h3>Diploma</h3></strong></a></td>
+						<td><p>FT</p></td>
+						<td><p>US$ 1,430/-</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>Under Graduate</h3></strong></a></td>
+						<td><p>FT</p></td>
+						<td><p>	US$ 1,430/-</p></td>
+					</tr>
+					<tr>
+						<td><strong><h3>Post Graduate</h3></strong></a></td>
+						<td><p>FT</p></td>
+						<td><p>US$ 1,680/</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>MBA</h3></strong></a></td>
+						<td><p>PT</p></td>
+						<td><p>US$ 2,500/</p></td>
+				    </tr>
+					<tr>
+						<td><strong><h3>MPhil/PhD Degrees</h3></strong></a></td>
+						<td><p>FT</p><br><p>PT</p></td>
+						<td><p>US$ 5,000/- per 12-month period</p><br><p>US$ 5,000/- per 12-month period</p></td>
+				    </tr>
+
+				 </tbody>
+			</table>
+<p>International candidates should also have a minimum of US$250 per month for expenses such as lodging, food, transport and clothing</p>
+
+
+
+		</div>
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+	<!-----eventpage----->
+	<div data-role="page"  id="eventpage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">EVENT</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+			<p>I Am Now A Mobile Developer!!</p>
+			<a href="#pageone" data-transition="pop">Go to Page One</a>
+		</div>
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+		<!-----newspage----->
+	<div data-role="page"  id="newspage">
+		<div id="header" data-role="header">
+			<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+			<div class="logo"></div>
+			<h1 id="h1">University Technology of Mauritius</h1>
+			<h1 id="h1">NEWS</h1>
+			<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+		</div>
+
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+				<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+				<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+				<li><a href="#newspage" data-icon="power" data-theme="b" class="ui-btn-active ui-state-persist">News and Event</a></li>
+				
+				<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+			</ul>
+
+		</div>
+		<div data-role="main" class="ui-content">
+		<h1 class="title">UTM News</h1>
+           <ul data-role="listview" data-filter="true" id="list" data-split-icon="gear" data-split-theme="a" data-inset="true">
+           </ul>
+        <h1 class="title">UTM Events</h1>
+           <ul data-role="listview" data-filter="true" id="list2" data-split-icon="gear" data-split-theme="a" data-inset="true">
+           </ul>
+		</div>
+		<div data-role="footer" data-theme="b">
+			<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+		</div>
+	</div>
+
+
+	<!-----UNDERGRADUATE----->
+<div data-role="page"  id="undergraduate">
+<div id="header" data-role="header">
+	<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+	<div class="logo"></div>
+	<h1 id="h1">University Technology of Mauritius</h1>
+	<h1 id="h1">About Us</h1>
+	<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+</div>
+
+<div data-role="navbar">
+	<ul>
+		<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+		<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+		<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+         <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+		<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+	</ul>
+
+</div>
+<div data-role="main" class="ui-content">
+	<h1 class="center">Undergraduate Programmes - School of Health Sciences (SHS)</h1>
+	<h3>The programme available is:</h3>
+
+	<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+		<thead>
+			<tr class="ui-bar-d">
+				<th>Name</th>
+				<th>Mode</th>
+				<th>Duration</th>
+
+			</tr>
+		</thead>
+		 <tbody>
+			<tr>
+				<td><strong><h3>BSc. (Hons) Gerontology</h3></strong></td>
+				<td><p> FT/PT</p></td>
+				<td><p> 3 yrs / 4 yrs</p></td>
+			</tr>
+				<tr>
+				<td><strong><h3>BSc. (Hons) Environmental and Public Health</h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p> 3 yrs / 4 yrs</p></td>
+				</tr>
+			<tr>
+				<td><strong><h3>BSc. (Hons) Public Health Engineering (Top-Up)</h3></strong></a></td>
+				<td><p>FT/PT</p></td>
+				<td><p> 1½ yrs / 2 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>Diploma in Pharmacy Technician Studies  </h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p> 2 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>Diploma in Bioanalytical Laboratory Technology </h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p> 2 yrs</p></td>
+			</tr>
+		 </tbody>
+
+	</table>
+
+	<h1 class="center">Undergraduate Programmes - School of Business, Management and Finance (SBMF)</h1>
+	<h3>Department of Accounting, Finance and Economics</h3>
+	<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+		<thead>
+			<tr class="ui-bar-d">
+				<th>Name</th>
+				<th>Mode</th>
+				<th>Duration</th>
+
+			</tr>
+		</thead>
+		 <tbody>
+			<tr>
+				<td><strong><h3>BSc (Hons) Accounting with Finance (Accredited by ACCA)</h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p> 3 yrs / 4 yrs</p></td>
+			</tr>
+				<tr>
+				<td><strong><h3>BSc (Hons) Banking and International Finance</h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p> 3 yrs / 4 yrs</p></td>
+				</tr>
+			<tr>
+				<td><strong><h3>BSc (Hons) Financial Services with Law</h3></strong></a></td>
+				<td><p>FT/PT</p></td>
+				<td><p> 3 yrs/4 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>BSc (Hons) Economics with Management / with Finance / with Finance and International Business</h3></strong></a></td>
+			<td><p>FT/PT</p></td>
+			<td><p>3 yrs/4 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>Diploma in Bioanalytical Laboratory Technology </h3></strong></a></td>
+			<td><p> FT/PT</p></td>
+			<td><p> 3 yrs/4 yrs</p></td>
+			</tr>
+		 </tbody>
+
+	</table>
+	<h1 class="center">Undergraduate Programmes - School of Sustainable Development and Tourism (SSDT):</h1>
+<h3>The programme available is:</h3>
+	<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+		<thead>
+			<tr class="ui-bar-d">
+				<th>Name</th>
+				<th>Mode</th>
+				<th>Duration</th>
+			</tr>
+		</thead>
+		 <tbody>
+			<tr>
+				<td><strong><h3>BSc (Hons) Sustainable Urban Planning </h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p> 3 yrs / 4 yrs</p></td>
+			</tr>
+				<tr>
+				<td><strong><h3>BSc (Hons) Environmental Health</h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p> 3 yrs / 4 yrs</p></td>
+				</tr>
+			<tr>
+				<td><strong><h3>BSc (Hons) Sustainable Environmental Planning and Management</h3></strong></a></td>
+				<td><p>FT/PT</p></td>
+				<td><p> 3 yrs/4 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>BSc (Hons) Services Management and Marketing</h3></strong></a></td>
+			<td><p>FT/PT</p></td>
+			<td><p>3 yrs/4 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>BSc (Hons) Tourism and Hospitality Management</h3></strong></a></td>
+			<td><p> FT/PT</p></td>
+			<td><p> 3 yrs/4 yrs</p></td>
+			</tr>
+		 </tbody>
+
+	</table>
+	<h1 class="center">Undergraduate Programmes - School of Innovative Technologies and Engineering (SITE)</h1>
+<h3>The programme available is:</h3>
+	<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+		<thead>
+			<tr class="ui-bar-d">
+				<th>Name</th>
+				<th>Mode</th>
+				<th>Duration</th>
+
+			</tr>
+		</thead>
+		 <tbody>
+			<tr>
+				<td><strong><h3>BEng (Hons) Civil Engineering (Top Up) (run by JSSATE, Mauritius)</h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p>2 ½ yrs / 3 ½ yrs</p></td>
+			</tr>
+				<tr>
+				<td><strong><h3>BEng (Hons) Electrical Engineering (Top Up) (run by JSSATE, Mauritius)	</h3></strong></a></td>
+				<td><p> FT/PT</p></td>
+				<td><p>2 ½ yrs / 3 ½ yrs</p></td>
+				</tr>
+			<tr>
+				<td><strong><h3>BEng (Hons) Electronic Engineering</h3></strong></a></td>
+				<td><p>FT/PT</p></td>
+				<td><p> 4 yrs/6 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>BEng (Hons) Telecommunications (Top Up)</h3></strong></a></td>
+			<td><p>FT/PT</p></td>
+			<td><p>2 ½ yrs / 3 ½ yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>BSc (Hons) Mathematics</h3></strong></a></td>
+			<td><p> FT/PT</p></td>
+			<td><p> 3 yrs/4 yrs</p></td>
+			</tr>
+			<tr>
+			<td><strong><h3>BSc (Hons) Software Engineering</h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p> 3 yrs</p></td>
+			</tr>
+		 </tbody>
+
+	</table>
+<p>** - Updated programmes will be available soon</p>
+
+
+
+</div>
+<div data-role="footer" data-theme="b">
+	<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+</div>
+</div>
+
+
+
+
+
+<!-----POSTGRADUATE----->
+<div data-role="page"  id="postgraduate">
+<div id="header" data-role="header">
+<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+<div class="logo"></div>
+<h1 id="h1">University Technology of Mauritius</h1>
+<h1 id="h1">About Us</h1>
+<a href="#login" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+</div>
+
+<div data-role="navbar">
+<ul>
+	<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+	<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+	<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+	  <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+		<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+</ul>
+
+</div>
+<div data-role="main" class="ui-content">
+<h1 class="center">Postgraduate Programmes - School of Health Sciences (SHS)</h1>
+<h3>The programme available is:</h3>
+
+<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+	<thead>
+		<tr class="ui-bar-d">
+			<th>Name</th>
+			<th>Mode</th>
+			<th>Duration</th>
+
+		</tr>
+	</thead>
+	 <tbody>
+		<tr>
+			<td><strong><h3>MSc Mental Health </h3></strong></a></td>
+			<td><p>PT</p></td>
+			<td><p> 2 yrs</p></td>
+		</tr>
+			<tr>
+			<td><strong><h3>MSc Health Services Management</h3></strong></a></td>
+			<td><p>PT</p></td>
+			<td><p> 2 yrs</p></td>
+			</tr>
+
+	 </tbody>
+
+</table>
+
+<h1 class="center">Postgraduate Programmes - School of Business, Management and Finance (SBMF)</h1>
+<h3>Department of Accounting, Finance and Economics</h3>
+<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+	<thead>
+		<tr class="ui-bar-d">
+			<th>Name</th>
+			<th>Mode</th>
+			<th>Duration</th>
+
+		</tr>
+	</thead>
+	 <tbody>
+		<tr>
+			<td><strong><h3>MBA - Finance and Investment </h3></strong></a></td>
+			<td><p>PT</p></td>
+			<td><p> 2 yrs</p></td>
+		</tr>
+			<tr>
+			<td><strong><h3>MBA - Financial Risk Management</h3></strong></a></td>
+			<td><p>PT</p></td>
+			<td><p> 2 yrs</p></td>
+			</tr>
+		<tr>
+			<td><strong><h3>MSc International Business and Economics</h3></strong></a></td>
+			<td><p>PT</p></td>
+			<td><p> 2 yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MSc Procurement and Supply Management</h3></strong></a></td>
+		<td><p>PT</p></td>
+		<td><p> 1½ yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MSc Banking and Finance</h3></strong></a></td>
+		<td><p>PT</p></td>
+		<td><p> 2 yrs</p></td>
+		</tr>
+	 </tbody>
+
+</table>
+<h1 class="center">Postgraduate Programmes - School of Sustainable Development and Tourism (SSDT):</h1>
+<h3>The programme available is:</h3>
+<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+	<thead>
+		<tr class="ui-bar-d">
+			<th>Name</th>
+			<th>Mode</th>
+			<th>Duration</th>
+
+		</tr>
+	</thead>
+	 <tbody>
+		<tr>
+			<td><strong><h3>MSc Climate Change, Health and Disaster Management </h3></strong></a></td>
+			<td><p> FT/PT</p></td>
+			<td><p> 1½ yrs/2 yrs</p></td>
+		</tr>
+			<tr>
+			<td><strong><h3>MSc Property and Resort Management </h3></strong></a></td>
+			<td><p> PT</p></td>
+			<td><p> 2 yrs</p></td>
+			</tr>
+		<tr>
+			<td><strong><h3>MSc Hotel Management</h3></strong></a></td>
+			<td><p> PT</p></td>
+			<td><p> 2 yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MSc International Tourism Management</h3></strong></a></td>
+		<td><p> PT</p></td>
+		<td><p> 2 yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MSc Tourism Management and Marketing</h3></strong></a></td>
+		<td><p> PT</p></td>
+		<td><p> 2 yrs</p></td>
+		</tr>
+	 </tbody>
+
+</table>
+<h1 class="center">Postgraduate Programmes - School of Innovative Technologies and Engineering (SITE)</h1>
+<h3>The programme available is:</h3>
+<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+	<thead>
+		<tr class="ui-bar-d">
+			<th>Name</th>
+			<th>Mode</th>
+			<th>Duration</th>
+
+		</tr>
+	</thead>
+	 <tbody>
+		<tr>
+			<td><strong><h3>Postgraduate Diploma in Information Technology (With Specialisation in Networking) - jointly with Orange Business Services (OBS)  </h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p>10 mths</p></td>
+		</tr>
+			<tr>
+			<td><strong><h3>Postgraduate Diploma in Information Technology - Jointly with the Ceridian Learning centre</h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p>6 mths</p></td>
+			</tr>
+		<tr>
+			<td><strong><h3>MSc Applied Statistics with Operational Research</h3></strong></a></td>
+			<td><p>FT/PT</p></td>
+			<td><p> 1 yr / 1½ yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MSc Software Engineering</h3></strong></a></td>
+		<td><p>FT/PT</p></td>
+		<td><p>1 yr / 1½ yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MA Graphics Design</h3></strong></a></td>
+		<td><p> FT/PT</p></td>
+		<td><p>1 yr / 1½ yrs</p></td>
+		</tr>
+		<tr>
+		<td><strong><h3>MSc Computational Science and Engineering</h3></strong></a></td>
+		<td><p> FT/PT</p></td>
+		<td><p>1 yr / 1½ yrs</p></td>
+		</tr>
+	 </tbody>
+
+</table>
+<p>** - Updated programmes will be available soon</p>
+
+
+
+</div>
+<div data-role="footer" data-theme="b">
+<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+</div>
+</div>
+
+
+
+
+
+
+<!-----AWARDCOURSES----->
+<div data-role="page"  id="awardcourse">
+<div id="header" data-role="header">
+<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+<div class="logo"></div>
+<h1 id="h1">University Technology of Mauritius</h1>
+<h1 id="h1">About Us</h1>
+<a href="#login" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+</div>
+
+<div data-role="navbar">
+<ul>
+	<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+	<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+	<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+	  <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+		<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+</ul>
+
+</div>
+<div data-role="main" class="ui-content">
+<h1 class="center">Award Courses</h1>
+<h3>The courses available are:</h3>
+
+<table data-role="table" id="tblstaffsbmf" data-mode="reflow" class="ui-body-d ui-shadow table-stripe ui-responsive">
+	<thead>
+		<tr class="ui-bar-d">
+			<th>Name</th>
+			<th>Mode</th>
+			<th>Duration</th>
+
+		</tr>
+	</thead>
+	 <tbody>
+		<tr>
+			<td><strong><h3>Award Courses for Higher Executive Officers</h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p> 2 Semesters</p></td>
+		</tr>
+			<tr>
+			<td><strong><h3>Award Courses for Executive Officers</h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p> 1 Semester</p></td>
+			</tr>
+		<tr>
+			<td><strong><h3>Award Courses for Confidential Secretaries</h3></strong></a></td>
+			<td><p> FT</p></td>
+			<td><p> 1 Semester</p></td>
+		</tr>
+
+	 </tbody>
+
+</table>
+
+
+
+
+
+
+</div>
+<div data-role="footer" data-theme="b">
+<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+</div>
+</div>
+
+
+
+
+<!-----internationalstudent----->
+<div data-role="page"  id="internationalstudent">
+<div id="header" data-role="header">
+<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left" data-theme="b">Home</a>
+<div class="logo"></div>
+<h1 id="h1">University Technology of Mauritius</h1>
+<h1 id="h1">About Us</h1>
+<a href="#login" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+</div>
+
+<div data-role="navbar">
+<ul>
+	<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+	<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+	<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+	  <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+		<li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+</ul>
+
+</div>
+<div data-role="main" class="ui-content">
+	<div class="background1">
+		<div class="background2">
+<h1 class="center">International Students</h1>
+<h3>INTERNATIONAL APPLICATION PROCEDURES</h3>
+
+<ul>
+	<li>Complete the application form using a black pen</li>
+	<br>
+	<li>Complete </li>
+	<br>
+	<li>Ensure all sections are filled in </li>
+	<br>
+	<li>Ensure that your personal details are clear (especially email, telephone and address) </li>
+	<br>
+		<li>Sign and date the application form </li>
+<br>
+			<li>Attach copies of your Secondary School Certificate (O level and A level) </li>
+<br>
+				<li>Copies of certificates should be certified through  copy by Notary in your country. There should be evidence of equivalence of ‘O’ Level,GCE ‘O’Level in GCE ‘A’ Level respectively with Cambridge Examination Syndicate for ‘O’ and ‘A’ level to be provided by competent authority from applicants country of origin. For instance from Ministry of Education, National Qualifications Authority or National Equivalence Council. </li>
+<br>
+					<li>Attach copies of your Certificates and Diplomas </li>
+<br>
+
+					<li>Attach copies of any other certificates that may help your application
+ </li>
+<br>
+<li>Attach references: Either School leaving certificate and one reference from your school or - Two references, at least one from the school you last attended
+ </li>
+<br>
+<li>Send the completed application form and supporting documents to the office.
+ </li>
+<br>
+<li>After you have met all the conditions you will then be sent an “offer letter” which means a place has been reserved for you
+ </li>
+<br>
+
+</ul>
+<p><strong>It takes 2-4 weeks to receive offer letter</strong></p>
+
+<p>Once application has been processed, an Offer Package is sent, which consists of:</p>
+<ol>
+	<li>Letter of Offer
+</li>
+	<br>
+	<li>Invoice, with Terms of Payment
+</li>
+	<br>
+	<li>Visa Application Form and Checklist of required documents
+</li>
+	<br>
+	<li>UTM Housing Services Options
+</li>
+</ol>
+
+</div>
+</div>
+
+
+
+</div>
+<div data-role="footer" data-theme="b">
+<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+</div>
+</div>
+
+
+
+<!-----regulations----->
+<div data-role="page"  id="regulation">
+<div id="header" data-role="header">
+<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left " data-theme="b">Home</a>
+<div class="logo"></div>
+<h1 id="h1">University Technology of Mauritius</h1>
+<h1 id="h1">About Us</h1>
+<a href="#login" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+</div>
+
+<div data-role="navbar">
+<ul>
+	<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+	<li><a href="#pspage" data-icon="edit" data-theme="b" class="ui-btn-active ui-state-persist">Prospective</a></li>
+	<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+	<li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+    <li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+</ul>
+
+</div>
+<div data-role="main" class="ui-content">
+	<div class="background1">
+		<div class="background2">
+<h1 class="center">Regulations and Policy Documents</h1>
+
+<ol>
+	<li><strong>Glossary</strong></li>
+	<br>
+
+	<br>
+	<li><strong>Admission</strong> </li>
+	<br>
+	<br>
+	<ul>
+		<li>Admission Regulations</li><br>
+		<li>Application Form for Admission</li><br>
+		<li>Conduct of Short Courses</li><br>
+		<li>Application Form for Short Courses</li><br>
+		<li>Statement of Undertaking</li><br>
+		<li>Policy for Induction of UTM Full-Time and Part-Time Students</li><br>
+		<li>Assessing Prior Learning and Prior Experiential Learning</li><br>
+		<li>Module Exemption Policy</li><br>
+		<li>Request for Exemption Form</li><br>
+	</ul>
+	<br>
+	<li><strong>Programme Information </strong></li>
+	<br>
+	<br>
+	<ul>
+		<li>Regulations for Certificates (Under review)</li><br>
+		<li>Regulations for Diplomas (Under review)</li><br>
+		<li>Regulations for First Degrees</li><br>
+		<li>Regulations for MBBS Programmes (2017)</li><br>
+		<li>Regulations for Postgraduate Medical Programmes</li><br>
+		<li>Regulations for Master’s Degree, Postgraduate Diplomas and Postgraduate Certificates</li><br>
+		<li>Credit System</li><br>
+		<li>Programme Management Policy</li><br>
+		<li>Module Information and Plan (MIP)</li><br>
+
+	</ul>
+	<br>
+
+
+</ol>
+
+</div>
+</div>
+
+
+
+</div>
+<div data-role="footer" data-theme="b">
+<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+</div>
+</div>
+
+<!-----stulogin----->
+<div data-role="page" id="login1">
+	<div id="header" data-role="header">
+		<a href="#homepage" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Home</a>
+		<div class="logo"></div>
+		<h1 id="h1" class="ui-responsive">University Technology of Mauritius</h1>
+		<a href="#studentdash" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Login</a>
+	</div>
+
+	<div data-role="navbar">
+		<ul>
+			<li><a href="#schoolpage" data-icon="shop" data-theme="b">School</a></li>
+			<li><a href="#pspage" data-icon="edit" data-theme="b">Prospective</a></li>
+			<li><a href="#aboutpage" data-icon="arrow-r" data-theme="b">About</a></li>
+           <li><a href="#newspage" data-icon="power" data-theme="b">News and Event</a></li>
+		   <li><a href="#studentcorner" data-icon="star" data-theme="b">Student corner</a></li>
+		</ul>
+
+	</div>
+
+	<div data-role="main" class="ui-content" data-theme="c">
+
+<div class="background1">
+	<div class="background2">
+
+
+		<form id="form">
+			<h3>Student Login</h3>
+			<p id="returnmessage"></p>
+			<label>Username: </label>
+			<input type="text" id="uname" placeholder="Username"/>
+			<label>Password: </label>
+			<input type="password" id="pass" placeholder="Password"/>
+
+
+			<input type="button" id="submit" value="Login"/>
+			</form>
+
+
+
+
+</div>
+</div>
+</div>
+	<div data-role="footer" data-theme="b">
+		<h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+	</div>
+	</div>
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+<!--- STUDENT SECTION STARTS---->
+
+
+<!-----studentdash----->
+  <div data-role="page"  id="studentdash" data-theme="b">
+<!--panel-->
+<div data-role="panel" id="myPanel">
+<a href="#stunews" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">News</a>
+<a href="#stuevents" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Events</a>
+<a href="#stutimetable" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Semester Timetable</a>
+<a href="#stuexamtime" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Exam Timetable</a>
+<a href="#sturesults" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Results</a>
+<a href="#stupostgrad" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Post Graduate</a>
+<a href="#stuundergrad" class="ui-btn ui-icon-home ui-btn-icon-left ui-btn-active ui-state-persist" data-theme="b">Undergraduate</a>
+
+
+
+</div>
+
+      <div id="header" data-role="header">
+
+
+        <div class="logo"></div>
+        <h1 id="h1">University Technology of Mauritius</h1>
+        <h1 id="h1">Student Dashboard</h1>
+
+        <a href="index.html" class="ui-btn ui-icon-user ui-btn-icon-left" data-theme="b">Log Out</a>
+
+
+
+<div data-role="header">
+<div data-role="navbar">
+<ul>
+<li><a href="#studentdash"  class="ui-btn-active ui-state-persist" data-icon="home">Home</a></li>
+<li><a href="#myPanel"  data-icon="grid">Open Panel</a></li>
+</ul>
+</div>
+</div>
+      </div>
+
+      <div data-role="main" class="ui-content" data-theme="b">
+        <h1>Welcome To Your Student Dashboard !!</h1>
+				<h3>You may click on open panel to access the student menu</h3>
+				<p>It is from here that you can control your account</p>
+
+      </div>
+      <div data-role="footer" data-theme="b">
+        <h1>Disclaimer Copyright © 2019 University Of Technology, Mauritius. All Rights Reserved.</h1>
+      </div>
+
+    </div>
+    
+
+
+
+
+</body>
+
+</html>

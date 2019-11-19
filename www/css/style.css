@@ -1,0 +1,73 @@
+.logo {
+	width:230px;
+	height:80px;
+	background:url(../image/utmlogo.gif) no-repeat center ;
+	margin:0 auto;
+	background-size: 230px 80px;
+	margin-top:10px;
+
+}
+#header{
+	background-color:lightsteelblue;
+}
+#h1{
+	font-size:30px;
+}
+.start{
+	height:80px;
+}
+ .leaflet-bar {
+        color: blue;
+		font-size:15px;
+}
+
+.school{
+	padding:10px;
+}
+
+h4{
+color:DodgerBlue;
+}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+.background{
+	height: 355px;
+	margin: 10px;
+
+}
+.backgroundwa{
+	height:235px;
+	margin: 10px;
+}
+.background1{
+	margin: 50px 15% 50px 15%;
+	 background-color: #cccccc;
+
+}
+.background2{
+	position: relative;
+	top: -20px;
+	left: -20px;
+	padding: 20px;
+	background: #ffffff;
+	border: 2px solid #cccccc;
+}
+.center{
+	text-align:center;
+}
+#home{
+	text-align:center;
+}
